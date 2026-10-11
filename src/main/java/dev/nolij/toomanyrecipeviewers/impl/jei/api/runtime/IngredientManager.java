@@ -40,7 +40,8 @@ import mezz.jei.common.ingredients.ITypedIngredientFactory;
 import mezz.jei.common.input.ClickableIngredient;
 import mezz.jei.common.util.ImmutableRect2i;
 import mezz.jei.library.ingredients.IngredientInfo;
-import mezz.jei.library.ingredients.TypedIngredient;
+import mezz.jei.common.ingredients.TypedIngredient;
+import mezz.jei.common.ingredients.TypedIngredientUtil;
 import mezz.jei.library.plugins.vanilla.ingredients.fluid.FluidIngredientHelper;
 import mezz.jei.library.render.FluidTankRenderer;
 import mezz.jei.library.render.ItemStackRenderer;
@@ -413,10 +414,16 @@ public class IngredientManager implements IIngredientManager, IModIngredientRegi
 	}
 	
 	@Override
+	public <V> ITypedIngredient<V> checkTypedIngredientFromApi(ITypedIngredient<V> typedIngredient) {
+		return TypedIngredientUtil.checkTypedIngredientFromApi(this, typedIngredient);
+	}
+	
+	@Override
 	public <V> ITypedIngredient<V> normalizeTypedIngredient(ITypedIngredient<V> typedIngredient) {
-		final var type = typedIngredient.getType();
-		final var ingredientHelper = getIngredientHelper(type);
-		return TypedIngredient.normalize(typedIngredient, ingredientHelper);
+		// unknown (plugin-provided) implementations may predate `ITypedIngredient.normalize`, so check them first like JEI does
+		final var checkedIngredient = checkTypedIngredientFromApi(typedIngredient);
+		final var ingredientHelper = getIngredientHelper(checkedIngredient.getType());
+		return checkedIngredient.normalize(ingredientHelper);
 	}
 	
 	//? if >=21.1

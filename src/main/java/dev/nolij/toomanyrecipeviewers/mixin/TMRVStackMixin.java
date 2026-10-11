@@ -1,8 +1,10 @@
 package dev.nolij.toomanyrecipeviewers.mixin;
 
 import dev.nolij.toomanyrecipeviewers.impl.ingredient.TMRVStack;
+import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
+import mezz.jei.common.ingredients.TypedIngredient;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,6 +27,12 @@ public class TMRVStackMixin<T> implements ITypedIngredient<T> {
 	@Override
 	public T getIngredient() {
 		return ingredient;
+	}
+	
+	// same result the removed static `TypedIngredient.normalize(ITypedIngredient, IIngredientHelper)` produced for non-item types
+	@Override
+	public ITypedIngredient<T> normalize(IIngredientHelper<T> ingredientHelper) {
+		return TypedIngredient.createUnvalidated(type, ingredientHelper.normalizeIngredient(ingredient));
 	}
 	
 	@Override

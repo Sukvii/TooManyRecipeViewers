@@ -24,7 +24,7 @@ import dev.emi.emi.platform.EmiClient;
 import dev.emi.emi.registry.EmiRecipeFiller;
 import dev.nolij.toomanyrecipeviewers.mixin.PacketRecipeTransferAccessor;
 import mezz.jei.common.network.IConnectionToServer;
-import mezz.jei.common.network.packets.PacketRecipeTransfer;
+import mezz.jei.common.network.packets.legacy.PacketRecipeTransfer;
 import mezz.jei.common.transfer.TransferOperation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;

@@ -22,6 +22,7 @@ import mezz.jei.api.recipe.IRecipeManager;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferManager;
 import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
+import mezz.jei.api.runtime.IBookmarkManager;
 import mezz.jei.api.runtime.IBookmarkOverlay;
 import mezz.jei.api.runtime.IEditModeConfig;
 import mezz.jei.api.runtime.IIngredientFilter;
@@ -279,6 +280,11 @@ public final class TooManyRecipeViewers {
 		@Override
 		public IJeiConfigManager getConfigManager() {
 			return jeiConfigManager;
+		}
+		
+		@Override
+		public IBookmarkManager getBookmarkManager() {
+			return runtime.jeiRuntime.getBookmarkManager();
 		}
 	};
 	//endregion

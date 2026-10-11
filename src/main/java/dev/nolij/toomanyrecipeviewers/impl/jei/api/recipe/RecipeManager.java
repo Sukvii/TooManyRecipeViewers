@@ -49,6 +49,7 @@ import dev.emi.emi.registry.EmiRecipes;
 import dev.emi.emi.runtime.EmiReloadManager;
 import dev.nolij.toomanyrecipeviewers.TooManyRecipeViewers;
 import dev.nolij.toomanyrecipeviewers.impl.ingredient.ErrorEmiStack;
+import dev.nolij.toomanyrecipeviewers.impl.jei.api.gui.builder.TMRVIngredientCollector;
 import dev.nolij.toomanyrecipeviewers.impl.jei.api.runtime.IngredientManager;
 import dev.nolij.toomanyrecipeviewers.impl.jei.api.gui.builder.RecipeLayoutBuilder;
 import dev.nolij.toomanyrecipeviewers.impl.recipe.ExtendedCraftingRecipe;
@@ -67,6 +68,7 @@ import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.gui.IRecipeLayoutDrawable;
+import mezz.jei.api.gui.builder.IIngredientAcceptor;
 import mezz.jei.api.gui.drawable.IScalableDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
 import mezz.jei.api.helpers.IJeiHelpers;
@@ -282,6 +284,11 @@ public class RecipeManager implements IRecipeManager, IRecipeCategoryRegistratio
 			@Override
 			public Stream<ITypedIngredient<?>> get() {
 				return getRecipeCatalystStream(recipeType, includeHidden);
+			}
+			
+			@Override
+			public Stream<Consumer<IIngredientAcceptor<?>>> getGroups() {
+				return getRecipeCatalystGroupStream(recipeType, includeHidden);
 			}
 			
 			@Override
@@ -585,6 +592,21 @@ public class RecipeManager implements IRecipeManager, IRecipeCategoryRegistratio
 			.filter(ingredientVisibility::isIngredientVisible);
 	}
 	
+	// JEI 19.54: each EMI workstation is one (possibly rotating) catalyst group
+	private <T> Stream<Consumer<IIngredientAcceptor<?>>> getRecipeCatalystGroupStream(RecipeType<T> recipeType, boolean includeHidden) {
+		final var emiCategory = category(recipeType).getEMICategory();
+		return EmiApi.getRecipeManager().getWorkstations(emiCategory)
+			.stream()
+			.map(workstation -> workstation.getEmiStacks()
+				.stream()
+				.<ITypedIngredient<?>>map(ingredientManager::getTypedIngredient)
+				.filter(Objects::nonNull)
+				.filter(typedIngredient -> includeHidden || ingredientVisibility.isIngredientVisible(typedIngredient))
+				.toList())
+			.filter(group -> !group.isEmpty())
+			.map(group -> (Consumer<IIngredientAcceptor<?>>) acceptor -> group.forEach(acceptor::addTypedIngredient));
+	}
+	
 	public boolean isRecipeCatalyst(RecipeType<?> recipeType, IFocus<?> focus) {
 		final var category = category(recipeType);
 		final var emiCategory = category.getEMICategory();
@@ -708,6 +730,20 @@ public class RecipeManager implements IRecipeManager, IRecipeCategoryRegistratio
 			
 			registry.addWorkstation(emiCategory, ingredientManager.getEMIStack(catalystType, catalyst));
 		}
+	}
+	
+	// JEI 19.54: all ingredients added by `ingredientAdder` rotate in a single catalyst slot
+	@Override
+	public void addRecipeCatalyst(RecipeType<?> recipeType, Consumer<IIngredientAcceptor<?>> ingredientAdder) {
+		if (locked)
+			throw new IllegalStateException();
+		
+		final var collector = new TMRVIngredientCollector(ingredientManager);
+		ingredientAdder.accept(collector);
+		if (collector.isEmpty())
+			return;
+		
+		registry.addWorkstation(category(recipeType).getEMICategory(), collector.getEMIIngredient());
 	}
 	
 	@Override

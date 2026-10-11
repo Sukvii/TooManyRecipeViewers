@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.render.EmiTexture;
 import dev.emi.emi.api.widget.Bounds;
+import dev.emi.emi.api.widget.FillingArrowWidget;
 import dev.emi.emi.api.widget.Widget;
 import dev.emi.emi.api.widget.WidgetHolder;
 import dev.emi.emi.jemi.impl.JemiTooltipBuilder;
@@ -13,6 +14,7 @@ import dev.nolij.toomanyrecipeviewers.impl.jei.api.gui.builder.RecipeLayoutBuild
 import dev.nolij.toomanyrecipeviewers.impl.jei.api.gui.widgets.ScrollGridWidget;
 import dev.nolij.toomanyrecipeviewers.impl.widget.DeferredPlaceableWidget;
 import dev.nolij.toomanyrecipeviewers.impl.widget.DrawableWidget;
+import dev.nolij.toomanyrecipeviewers.impl.widget.EmiDrawableWidget;
 import dev.nolij.toomanyrecipeviewers.impl.widget.FillingFlameWidget;
 import dev.nolij.toomanyrecipeviewers.impl.widget.TextWidget;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
@@ -24,6 +26,7 @@ import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.gui.inputs.IJeiGuiEventListener;
 import mezz.jei.api.gui.inputs.IJeiInputHandler;
 import mezz.jei.api.gui.placement.IPlaceable;
+import mezz.jei.api.gui.widgets.IDrawableWidget;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
 import mezz.jei.api.gui.widgets.IRecipeWidget;
 import mezz.jei.api.gui.widgets.IScrollBoxWidget;
@@ -31,10 +34,13 @@ import mezz.jei.api.gui.widgets.IScrollGridWidget;
 import mezz.jei.api.gui.widgets.ISlottedRecipeWidget;
 import mezz.jei.api.gui.widgets.ITextWidget;
 import mezz.jei.api.recipe.RecipeIngredientRole;
+import mezz.jei.common.gui.elements.DrawableBlank;
+import mezz.jei.common.gui.elements.DrawableRecipeWidget;
 import mezz.jei.gui.input.InputType;
 import mezz.jei.gui.input.UserInput;
 import mezz.jei.library.gui.widgets.ScrollBoxRecipeWidget;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.FormattedText;
@@ -262,5 +268,53 @@ abstract class TMRVRecipeWidget extends Widget implements IRecipeExtrasBuilder {
 	public ITextWidget addText(List<FormattedText> lines, int maxWidth, int maxHeight) {
 		return widgets.add(new TextWidget(lines, maxWidth, maxHeight));
 	}
+	
+	//region JEI 19.51+ widget builders (positioned like JEI: drawn at (0, 0) until moved, and support tooltips)
+	private IDrawableWidget addRecipeWidget(IDrawableWidget widget) {
+		addWidget((IRecipeWidget) widget);
+		return widget;
+	}
+	
+	private IDrawableWidget addEmiWidget(Renderable renderable, int width, int height) {
+		return addRecipeWidget(new EmiDrawableWidget(renderable, width, height));
+	}
+	
+	private IDrawableWidget addEmiTexture(EmiTexture texture) {
+		return addEmiWidget((draw, mouseX, mouseY, delta) -> texture.render(draw, 0, 0, delta), texture.width, texture.height);
+	}
+	
+	@Override
+	public IDrawableWidget addDrawableWidget(IDrawable drawable) {
+		return addRecipeWidget(new DrawableRecipeWidget(drawable));
+	}
+	
+	@Override
+	public IDrawableWidget addTooltipArea(int x, int y, int width, int height) {
+		if (width < 0 || height < 0)
+			throw new IllegalArgumentException("width and height must be non-negative");
+		
+		return addRecipeWidget(new DrawableRecipeWidget(new DrawableBlank(width, height)).setPosition(x, y));
+	}
+	
+	@Override
+	public IDrawableWidget addRecipeArrowWidget() {
+		return addEmiTexture(EmiTexture.EMPTY_ARROW);
+	}
+	
+	@Override
+	public IDrawableWidget addRecipePlusSignWidget() {
+		return addEmiTexture(EmiTexture.PLUS);
+	}
+	
+	@Override
+	public IDrawableWidget addAnimatedRecipeArrowWidget(int ticksPerCycle) {
+		return addEmiWidget(new FillingArrowWidget(0, 0, ticksPerCycle * 50), EmiTexture.EMPTY_ARROW.width, EmiTexture.EMPTY_ARROW.height);
+	}
+	
+	@Override
+	public IDrawableWidget addAnimatedRecipeFlameWidget(int cookTime) {
+		return addEmiWidget(new FillingFlameWidget(0, 0, cookTime * 50), EmiTexture.EMPTY_FLAME.width, EmiTexture.EMPTY_FLAME.height);
+	}
+	//endregion
 	
 }

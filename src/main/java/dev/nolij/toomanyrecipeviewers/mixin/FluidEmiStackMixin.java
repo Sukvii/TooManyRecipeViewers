@@ -7,8 +7,10 @@ import mezz.jei.api.ingredients.IIngredientTypeWithSubtypes;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.stack.FluidEmiStack;
 import dev.nolij.toomanyrecipeviewers.util.IFluidStackish;
+import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
+import mezz.jei.common.ingredients.TypedIngredient;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -76,6 +78,13 @@ public abstract class FluidEmiStackMixin implements ITypedIngredient<FluidStack>
 			return 1000L;
 		
 		return amount;
+	}
+	
+	// must exist at runtime (abstract mixin class hides it from javac); same result the removed static
+	// `TypedIngredient.normalize(ITypedIngredient, IIngredientHelper)` produced for non-item types
+	@Override
+	public ITypedIngredient<FluidStack> normalize(IIngredientHelper<FluidStack> ingredientHelper) {
+		return TypedIngredient.createUnvalidated(getType(), ingredientHelper.normalizeIngredient(getIngredient()));
 	}
 	
 	@Override

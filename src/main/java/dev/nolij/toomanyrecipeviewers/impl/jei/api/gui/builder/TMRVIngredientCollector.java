@@ -14,8 +14,9 @@ import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
-import mezz.jei.library.ingredients.TypedIngredient;
-import mezz.jei.library.ingredients.itemStacks.TypedItemStack;
+import mezz.jei.common.ingredients.TypedIngredient;
+import mezz.jei.common.ingredients.TypedIngredientUtil;
+import mezz.jei.common.ingredients.itemStacks.TypedItemStack;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
@@ -130,7 +131,7 @@ public class TMRVIngredientCollector implements IIngredientAcceptor<TMRVIngredie
 		} else if (typedIngredient instanceof IStackish<?>) {
 			collectedIngredients.add(typedIngredient);
 		} else {
-			final var copy = TypedIngredient.defensivelyCopyTypedIngredientFromApi(ingredientManager, typedIngredient);
+			final var copy = TypedIngredientUtil.checkAndValidateTypedIngredientFromApi(ingredientManager, typedIngredient);
 			collectedIngredients.add(copy != null ? copy : ErrorIngredient.TYPED_INSTANCE);
 		}
 		

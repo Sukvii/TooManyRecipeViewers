@@ -40,6 +40,7 @@ include(":jei-api")
 
 stonecutter.create(rootProject) {
 	version("21.1-neoforge", "21.1")
-	version("20.1-lexforge", "20.1")
+	// 1.20.1 is not maintained in this fork (the modpack is 1.21.1-only); its sources are kept but not built
+	// version("20.1-lexforge", "20.1")
 	branch("jei-api")
 }

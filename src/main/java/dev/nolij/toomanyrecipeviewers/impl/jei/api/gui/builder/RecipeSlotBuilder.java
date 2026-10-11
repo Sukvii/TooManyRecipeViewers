@@ -15,11 +15,14 @@ import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.drawable.TilingDirection;
 import mezz.jei.api.gui.ingredient.IRecipeSlotRichTooltipCallback;
+import mezz.jei.api.gui.placement.HorizontalAlignment;
+import mezz.jei.api.gui.placement.VerticalAlignment;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.common.util.ImmutableRect2i;
+import mezz.jei.common.util.PlaceableUtil;
 import mezz.jei.library.gui.recipes.layout.builder.LegacyTooltipCallbackAdapter;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.world.level.material.Fluid;
@@ -200,6 +203,12 @@ public class RecipeSlotBuilder implements IRecipeSlotBuilder {
 	public IRecipeSlotBuilder setPosition(int x, int y) {
 		this.rect = this.rect.setPosition(x, y);
 		return this;
+	}
+	
+	// newer JEI made this overload abstract (it used to be a default method with exactly this body)
+	@Override
+	public IRecipeSlotBuilder setPosition(int areaX, int areaY, int areaWidth, int areaHeight, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignment) {
+		return PlaceableUtil.setPosition(this, areaX, areaY, areaWidth, areaHeight, horizontalAlignment, verticalAlignment);
 	}
 	
 	@Override

@@ -2,7 +2,7 @@ package dev.nolij.toomanyrecipeviewers;
 
 //? if >=21.1 {
 import net.neoforged.fml.common.Mod;
-import mezz.jei.common.network.packets.PacketRecipeTransfer;
+import mezz.jei.common.network.packets.legacy.PacketRecipeTransfer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.NeoForge;

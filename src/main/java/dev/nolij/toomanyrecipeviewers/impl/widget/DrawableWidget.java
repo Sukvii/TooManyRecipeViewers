@@ -3,7 +3,10 @@ package dev.nolij.toomanyrecipeviewers.impl.widget;
 import dev.emi.emi.api.widget.Bounds;
 import dev.emi.emi.api.widget.Widget;
 import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.placement.HorizontalAlignment;
 import mezz.jei.api.gui.placement.IPlaceable;
+import mezz.jei.api.gui.placement.VerticalAlignment;
+import mezz.jei.common.util.PlaceableUtil;
 import net.minecraft.client.gui.GuiGraphics;
 
 public class DrawableWidget extends Widget implements IPlaceable<DrawableWidget> {
@@ -27,6 +30,12 @@ public class DrawableWidget extends Widget implements IPlaceable<DrawableWidget>
 		this.x = x;
 		this.y = y;
 		return this;
+	}
+	
+	// newer JEI made this overload abstract (it used to be a default method with exactly this body)
+	@Override
+	public DrawableWidget setPosition(int areaX, int areaY, int areaWidth, int areaHeight, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignment) {
+		return PlaceableUtil.setPosition(this, areaX, areaY, areaWidth, areaHeight, horizontalAlignment, verticalAlignment);
 	}
 	
 	@Override

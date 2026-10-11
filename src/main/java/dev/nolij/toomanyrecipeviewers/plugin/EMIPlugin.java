@@ -167,7 +167,7 @@ public final class EMIPlugin implements EmiPlugin {
 		runtime.codecHelper = new CodecHelper(runtime.ingredientManager, runtime.focusFactory);
 		runtime.vanillaRecipeFactory = new VanillaRecipeFactory(runtime.itemStackHelper);
 		
-		runtime.blacklist = new IngredientBlacklistInternal();
+		runtime.blacklist = new IngredientBlacklistInternal(runtime.ingredientManager);
 		runtime.ingredientManager.registerIngredientListener(runtime.blacklist);
 		runtime.clientToggleState = new ClientToggleState();
 		final EditModeConfig.ISerializer serializer;

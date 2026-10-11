@@ -4,6 +4,7 @@ import dev.nolij.toomanyrecipeviewers.impl.jei.api.registration.RuntimeRegistrat
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.recipe.IRecipeManager;
 import mezz.jei.api.recipe.transfer.IRecipeTransferManager;
+import mezz.jei.api.runtime.IBookmarkManager;
 import mezz.jei.api.runtime.IBookmarkOverlay;
 import mezz.jei.api.runtime.IEditModeConfig;
 import mezz.jei.api.runtime.IIngredientFilter;
@@ -14,6 +15,7 @@ import mezz.jei.api.runtime.IJeiRuntime;
 import mezz.jei.api.runtime.IRecipesGui;
 import mezz.jei.api.runtime.IScreenHelper;
 import mezz.jei.api.runtime.config.IJeiConfigManager;
+import mezz.jei.library.gui.BookmarkManagerDummy;
 import org.jetbrains.annotations.NotNull;
 
 public class JEIRuntime implements IJeiRuntime {
@@ -104,6 +106,12 @@ public class JEIRuntime implements IJeiRuntime {
 	@Override
 	public @NotNull IJeiConfigManager getConfigManager() {
 		return jeiConfigManager;
+	}
+	
+	// JEI 19.53; bookmarks are EMI favorites, which TMRV doesn't expose through this API (same fallback JEI uses without its GUI)
+	@Override
+	public @NotNull IBookmarkManager getBookmarkManager() {
+		return BookmarkManagerDummy.INSTANCE;
 	}
 	
 }

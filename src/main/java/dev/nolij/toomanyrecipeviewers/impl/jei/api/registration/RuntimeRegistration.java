@@ -9,6 +9,7 @@ import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.recipe.IRecipeManager;
 import mezz.jei.api.recipe.transfer.IRecipeTransferManager;
 import mezz.jei.api.registration.IRuntimeRegistration;
+import mezz.jei.api.runtime.IBookmarkManager;
 import mezz.jei.api.runtime.IBookmarkOverlay;
 import mezz.jei.api.runtime.IEditModeConfig;
 import mezz.jei.api.runtime.IIngredientFilter;
@@ -63,6 +64,11 @@ public class RuntimeRegistration implements IRuntimeRegistration {
 	
 	@Override
 	public void setIngredientFilter(@NotNull IIngredientFilter ingredientFilter) {
+		LOGGER.error(new UnsupportedOperationException());
+	}
+	
+	@Override
+	public void setBookmarkManager(@NotNull IBookmarkManager bookmarkManager) {
 		LOGGER.error(new UnsupportedOperationException());
 	}
 	

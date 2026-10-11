@@ -6,6 +6,7 @@ import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.stack.ItemEmiStack;
 import dev.nolij.toomanyrecipeviewers.util.IItemStackish;
 import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import net.minecraft.core.component.DataComponentPatch;
@@ -72,6 +73,14 @@ public abstract class ItemEmiStackMixin implements ITypedIngredient<ItemStack>, 
 	@Override
 	public long tmrv$getAmount() {
 		return ((ItemEmiStack) (Object) this).getAmount();
+	}
+	
+	// JEI 19.45 added `ITypedIngredient.normalize` as an abstract method; the mixin class is abstract so javac won't flag it if missing,
+	// but EMI stacks would then throw `AbstractMethodError` at runtime. Matches the old `TypedItemStackMixin` redirect.
+	@Override
+	public ITypedIngredient<ItemStack> normalize(IIngredientHelper<ItemStack> ingredientHelper) {
+		//noinspection unchecked
+		return (ITypedIngredient<ItemStack>) (Object) tmrv$normalize();
 	}
 	
 	@Override

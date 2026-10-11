@@ -2,9 +2,12 @@ package dev.nolij.toomanyrecipeviewers.impl.widget;
 
 import dev.emi.emi.api.widget.Bounds;
 import dev.emi.emi.api.widget.Widget;
+import mezz.jei.api.gui.placement.HorizontalAlignment;
 import mezz.jei.api.gui.placement.IPlaceable;
+import mezz.jei.api.gui.placement.VerticalAlignment;
 import mezz.jei.common.Internal;
 import mezz.jei.common.util.ImmutableRect2i;
+import mezz.jei.common.util.PlaceableUtil;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
 
@@ -72,6 +75,12 @@ public class ScrollBarWidget extends Widget implements IPlaceable<ScrollBarWidge
 	public ScrollBarWidget setPosition(int x, int y) {
 		setRect(rect.setPosition(x, y));
 		return this;
+	}
+	
+	// newer JEI made this overload abstract (it used to be a default method with exactly this body)
+	@Override
+	public ScrollBarWidget setPosition(int areaX, int areaY, int areaWidth, int areaHeight, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignment) {
+		return PlaceableUtil.setPosition(this, areaX, areaY, areaWidth, areaHeight, horizontalAlignment, verticalAlignment);
 	}
 	
 	@Override

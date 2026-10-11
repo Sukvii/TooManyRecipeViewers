@@ -110,6 +110,17 @@ public class ClientConfig implements IClientConfig {
 		return new JEIConfigValue<>(false);
 	}
 	
+	// added in newer JEI; same defaults as JEI. Only read by JEI-internal `RecipeSlot`/`JeiStarter`, not by TMRV's own slots
+	@Override
+	public IJeiConfigValue<Boolean> recipeSyncWarningEnabled() {
+		return new JEIConfigValue<>(true);
+	}
+	
+	@Override
+	public IJeiConfigValue<Boolean> recipeSlotCyclingEnabled() {
+		return new JEIConfigValue<>(true);
+	}
+	
 	@Override
 	public IJeiConfigValue<Boolean> lookupFluidContentsEnabled() {
 		return new JEIConfigValue<>(false);

@@ -6,6 +6,7 @@ import dev.emi.emi.input.EmiBind;
 import mezz.jei.api.runtime.IJeiKeyMapping;
 import mezz.jei.common.input.IInternalKeyMappings;
 import mezz.jei.common.input.keys.IJeiKeyMappingInternal;
+import mezz.jei.common.input.keys.IJeiKeyMappingWithExtraModifiers;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
@@ -185,8 +186,9 @@ public class JEIKeyMappings implements IInternalKeyMappings {
 		return dummy;
 	}
 	
+	// newer JEI narrowed these three return types to `IJeiKeyMappingWithExtraModifiers` (`IJeiKeyMappingInternal` extends it)
 	@Override
-	public IJeiKeyMapping getBookmark() {
+	public IJeiKeyMappingWithExtraModifiers getBookmark() {
 		return dummy;
 	}
 	
@@ -196,12 +198,12 @@ public class JEIKeyMappings implements IInternalKeyMappings {
 	}
 	
 	@Override
-	public @NotNull IJeiKeyMapping getShowRecipe() {
+	public @NotNull IJeiKeyMappingWithExtraModifiers getShowRecipe() {
 		return viewRecipes;
 	}
 	
 	@Override
-	public @NotNull IJeiKeyMapping getShowUses() {
+	public @NotNull IJeiKeyMappingWithExtraModifiers getShowUses() {
 		return viewUses;
 	}
 	
@@ -285,9 +287,10 @@ public class JEIKeyMappings implements IInternalKeyMappings {
 		return dummy; // TODO
 	}
 	
+	// added in newer JEI; EMI's recipe screen only has a "back" history binding
 	@Override
-	public IJeiKeyMappingInternal getShowBookmarkTooltipFeatures() {
-		return dummy; // TODO
+	public IJeiKeyMapping getRecipeForward() {
+		return dummy;
 	}
 	
 	@Override
