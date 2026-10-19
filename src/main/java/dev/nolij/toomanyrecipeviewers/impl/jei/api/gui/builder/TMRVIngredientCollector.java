@@ -17,6 +17,8 @@ import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.common.ingredients.TypedIngredient;
 import mezz.jei.common.ingredients.TypedIngredientUtil;
 import mezz.jei.common.ingredients.itemStacks.TypedItemStack;
+import mezz.jei.common.platform.IPlatformFluidHelperInternal;
+import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
@@ -28,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static dev.nolij.toomanyrecipeviewers.TooManyRecipeViewers.fluidHelper;
 
 @SuppressWarnings({"NonExtendableApiUsage", "unchecked", "UnstableApiUsage"})
 public class TMRVIngredientCollector implements IIngredientAcceptor<TMRVIngredientCollector> {
@@ -86,6 +90,14 @@ public class TMRVIngredientCollector implements IIngredientAcceptor<TMRVIngredie
 		return this;
 	}
 	
+	// JEI's own acceptor (`DisplayIngredientAcceptor`) never displays ingredients rejected by
+	// `IIngredientHelper.isValidIngredient`: they're dropped from lists or become blank entries. TMRV has no blank entries,
+	// so drop them. Since JEI 19.54 this includes non-source fluids, e.g. the `flowing_*` members of fluid tags.
+	private <T> boolean isValidFluid(IPlatformFluidHelperInternal<T> platformFluidHelper, Fluid fluid, long amount, DataComponentPatch dataComponentPatch) {
+		final var fluidStack = platformFluidHelper.create(Holder.direct(fluid), amount, dataComponentPatch);
+		return ingredientManager.getIngredientHelper(platformFluidHelper.getFluidIngredientType()).isValidIngredient(fluidStack);
+	}
+	
 	//region IIngredientAcceptor
 	@Override
 	public <I> TMRVIngredientCollector addIngredient(IIngredientType<I> type, I ingredient) {
@@ -94,9 +106,12 @@ public class TMRVIngredientCollector implements IIngredientAcceptor<TMRVIngredie
 				collectedIngredients.add(TypedItemStack.create(itemStack));
 			else
 				collectedIngredients.add(ErrorIngredient.TYPED_INSTANCE);
+		} else if (ingredient == null) {
+			collectedIngredients.add(ErrorIngredient.TYPED_INSTANCE);
 		} else {
 			final var typedIngredient = TypedIngredient.createAndFilterInvalid(ingredientManager, type, ingredient, false);
-			collectedIngredients.add(typedIngredient != null ? typedIngredient : ErrorIngredient.TYPED_INSTANCE);
+			if (typedIngredient != null)
+				collectedIngredients.add(typedIngredient);
 		}
 		
 		return this;
@@ -115,10 +130,13 @@ public class TMRVIngredientCollector implements IIngredientAcceptor<TMRVIngredie
 	public TMRVIngredientCollector addIngredientsUnsafe(List<?> ingredients) {
 		for (final var ingredient : ingredients) {
 			final var type = ingredientManager.getIngredientType(ingredient);
-			if (type != null)
-				collectedIngredients.add(TypedIngredient.createUnvalidated(type, ingredient));
-			else
+			if (type == null) {
 				collectedIngredients.add(ErrorIngredient.TYPED_INSTANCE);
+			} else {
+				final var typedIngredient = TypedIngredient.createAndFilterInvalid(ingredientManager, type, ingredient, false);
+				if (typedIngredient != null)
+					collectedIngredients.add(typedIngredient);
+			}
 		}
 		
 		return this;
@@ -132,7 +150,8 @@ public class TMRVIngredientCollector implements IIngredientAcceptor<TMRVIngredie
 			collectedIngredients.add(typedIngredient);
 		} else {
 			final var copy = TypedIngredientUtil.checkAndValidateTypedIngredientFromApi(ingredientManager, typedIngredient);
-			collectedIngredients.add(copy != null ? copy : ErrorIngredient.TYPED_INSTANCE);
+			if (copy != null)
+				collectedIngredients.add(copy);
 		}
 		
 		return this;
@@ -163,16 +182,25 @@ public class TMRVIngredientCollector implements IIngredientAcceptor<TMRVIngredie
 	
 	@Override
 	public TMRVIngredientCollector addFluidStack(Fluid fluid) {
+		if (!isValidFluid(fluidHelper, fluid, fluidHelper.bucketVolume(), DataComponentPatch.EMPTY))
+			return this;
+		
 		return addEMIStack(FluidEmiStack.of(fluid));
 	}
 	
 	@Override
 	public TMRVIngredientCollector addFluidStack(Fluid fluid, long amount) {
+		if (!isValidFluid(fluidHelper, fluid, amount, DataComponentPatch.EMPTY))
+			return this;
+		
 		return addEMIStack(FluidEmiStack.of(fluid, amount));
 	}
 	
 	@Override
 	public TMRVIngredientCollector addFluidStack(Fluid fluid, long amount, DataComponentPatch dataComponentPatch) {
+		if (!isValidFluid(fluidHelper, fluid, amount, dataComponentPatch))
+			return this;
+		
 		return addEMIStack(FluidEmiStack.of(fluid, dataComponentPatch, amount));
 	}
 	//endregion
